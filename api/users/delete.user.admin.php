@@ -25,6 +25,14 @@
         die();
     }
 
+    if(!$data->active) {
+        http_response_code(401);
+        echo json_encode([
+            "message" => "This admin is active'"
+        ]);
+        die();
+    }
+
     $data = $userService->deleteRegister($data->id);
     http_response_code(200);
     echo json_encode($data);
