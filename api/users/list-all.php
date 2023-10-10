@@ -4,8 +4,8 @@
     header("Access-Control-Allow-Methods: GET");
     header("Content-Type: application/json; charset=UTF-8");
 
+    include "../../middleware/check.authorizare.token.php";
     include "../../middleware/check.role.user.php";
-
     include_once "../../services/users/user.service.php";
 
     $userService = new UserService();

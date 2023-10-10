@@ -1,4 +1,5 @@
 <?php 
+include_once "../../env.info.php";
 
 class Database {
     private $host = "172.19.0.2";
@@ -6,7 +7,6 @@ class Database {
     private $username = "root";
     private $password = "root";
     public $conn = null;
-    private $db_table = "users";
     public $port = 3006;
 
     private function connectionDB() {
@@ -38,10 +38,6 @@ class Database {
 
     public function closeConnection() {
         $this->conn = null;
-    }
-
-    public function gettingTableName() {
-        return $this->db_table;
     }
 }
 

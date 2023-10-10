@@ -3,8 +3,8 @@ session_start();
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
+include "../../middleware/check.authorizare.token.php";
 include "../../middleware/check.role.user.php";
-
 include_once "../../services/users/user.service.php";
 
 $userService = new UserService();
