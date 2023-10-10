@@ -1,6 +1,9 @@
 <?php 
+    session_start();
     header("Access-Control-Allow-Methods: PUT");
     header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+
+    include "../../middleware/check.update.user.role.user.php";
 
     if(!isset($_GET['id'])) {
         http_response_code(401);
