@@ -94,24 +94,33 @@ class UserRepository extends Database implements RepositoryInterface {
     }
     public function update($id, $data) {
         try {
-            $query = "UPDATE " . $this->db_table 
-            ." SET role = :role,
-               lastName = :lastName,
-               name = :name,
-               email = :email
-               role = :role
-            WHERE id = :id";
+            $bindParams = array(
+                ":id" => $id,
+                ":name" => $data->name,
+                ":lastName" => $data->lastName,
+                ":email" => $data->email,
+                ":active" => $data->active,
+            );
 
+            $query = "UPDATE " . $this->db_table ." SET ";
+            if($_SESSION['user_role'] === "ADMIN") {
+                $query .= "role = :role, ";
+                $bindParams[':role'] = $data->role;
+            }
+
+            $query .= "lastName = :lastName, name = :name, email = :email, active = :active WHERE id = :id";
             $stmt = $this->connection->prepare($query);
+            echo json_encode($stmt);
+            foreach($bindParams as $paramName => $paramValue) {
+                $stmt->bindParam($paramName, $paramValue);
+            }
+            
+            if($stmt->execute()) {
+                return true;
+            }
 
-            $stmt->bindParam(":id", $id);
-            $stmt->bindParam(":role", $data->role);
-            $stmt->bindParam(":email", $data->email);
-            $stmt->bindParam(":name", $data->name);
-            $stmt->bindParam(":lastName", $data->lastName);
-            $stmt->execute();
-
-            return $stmt->fetch(PDO::FETCH_OBJ);
+            return false;
+              
         } catch (PDOException $pDOException) {
             print "Error in " . $pDOException->getMessage();
             $this->closeConnection();
