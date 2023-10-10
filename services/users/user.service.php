@@ -22,8 +22,8 @@ class UserService {
         return $this->userRepository->save($data);
     }
 
-    public function updateExistingRegister($data, $id) {
-
+    public function updateExistingRegister($id, $data) {
+        return $this->userRepository->update($id, $data);
     }
 
     public function deleteRegister($id) {

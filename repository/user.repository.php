@@ -12,7 +12,6 @@ class UserRepository extends Database implements RepositoryInterface {
         $this->connection = $this->gettingConnection();
       }
 
-
     public function findById($id) {
         try {
             $query = "SELECT 
@@ -75,26 +74,48 @@ class UserRepository extends Database implements RepositoryInterface {
             throw new Exception("Error in " . $pDOException->getMessage());
         }
     }
-    public function update($id, $data) {}
+    public function update($id, $data) {
+        try {
+
+            $query = "UPDATE " . $this->gettingTableName() ." SET role = :role WHERE id = :id";
+            $stmt = $this->connection->prepare($query);
+            $stmt->bindParam(":id", $id);
+            $stmt->bindParam(":role", $data->role);
+            $stmt->execute();
+
+            return $stmt->fetch(PDO::FETCH_OBJ);
+        } catch (PDOException $pDOException) {
+            print "Error in " . $pDOException->getMessage();
+            $this->closeConnection();
+            throw new Exception("Error in " . $pDOException->getMessage());
+        }
+    }
     public function delete($id) {}
 
     public function getByEmail($email) {
-        $query = "SELECT 
-        id,
-        name,
-        lastName,
-        email,
-        password
-        FROM ". $this->gettingTableName() ."
-        WHERE email = :email
-        LIMIT 0,1";
-
-        $stmt = $this->connection->prepare($query);
-        $stmt->bindParam(":email", $email);
-
-        $stmt->execute();
-
-        return $stmt->fetch(PDO::FETCH_OBJ);
+        try {
+            $query = "SELECT 
+            id,
+            name,
+            lastName,
+            email,
+            role,
+            password
+            FROM ". $this->gettingTableName() ."
+            WHERE email = :email
+            LIMIT 0,1";
+    
+            $stmt = $this->connection->prepare($query);
+            $stmt->bindParam(":email", $email);
+    
+            $stmt->execute();
+    
+            return $stmt->fetch(PDO::FETCH_OBJ);
+        } catch (PDOException $pDOException) {
+            print "Error in " . $pDOException->getMessage();
+            $this->closeConnection();
+            throw new Exception("Error in " . $pDOException->getMessage());
+        }
     }
 }
 

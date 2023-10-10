@@ -1,15 +1,12 @@
 <?php 
 
-include_once "../database.connection.php";
 class Database {
     private $host = "172.19.0.2";
     private $database_name = "users_test";
     private $username = "root";
     private $password = "root";
     public $conn = null;
-
     private $db_table = "users";
-
     public $port = 3006;
 
     private function connectionDB() {

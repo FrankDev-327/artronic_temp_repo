@@ -13,6 +13,8 @@ $data = json_decode(file_get_contents("php://input"));
 $userLogged = $authService->login($data);
 
 if($userLogged['check']) {
+    $_SESSION['user_id'] = $userLogged['data']->id;
+    $_SESSION['user_role'] = $userLogged['data']->role;
     http_response_code(200);
     echo json_encode($userLogged);
 } else {
