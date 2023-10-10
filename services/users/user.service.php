@@ -27,7 +27,11 @@ class UserService {
     }
 
     public function deleteRegister($id) {
+        return $this->userRepository->delete($id);
+    }
 
+    public function deleteAllAuthors() {
+        return $this->userRepository->deleteAuthors();
     }
     
     public function getDetailsRegister($id) {

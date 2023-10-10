@@ -8,6 +8,8 @@ class UserRepository extends Database implements RepositoryInterface {
 
       private $connection;
 
+      private $db_table = "users";
+
       public function __construct() {
         $this->connection = $this->gettingConnection();
       }
@@ -19,7 +21,7 @@ class UserRepository extends Database implements RepositoryInterface {
             name,
             lastName,
             email
-            FROM ". $this->gettingTableName() ."
+            FROM ". $this->db_table  ."
             WHERE id = ?
             LIMIT 0,1";
 
@@ -38,7 +40,14 @@ class UserRepository extends Database implements RepositoryInterface {
 
     public function findAll() {
         try {
-            $query = "SELECT * FROM ". $this->gettingTableName();
+            $query = "SELECT 
+            id,
+            email,
+            lastName,
+            name,
+            role,
+            active
+            FROM ". $this->db_table ;
             $stmt = $this->connection->prepare($query);
             $stmt->execute();
     
@@ -51,7 +60,14 @@ class UserRepository extends Database implements RepositoryInterface {
     }
     public function save($data) {
         try {
-            $query = "INSERT INTO ". $this->gettingTableName() ." SET id = :id, name = :name, email = :email, password = :password, lastName = :last_name";
+            $query = "INSERT INTO ". $this->db_table  
+            ." SET id = :id, 
+            name = :name, 
+            email = :email, 
+            active = :active,
+            role = :role,
+            password = :password, 
+            lastName = :last_name";
             $stmt = $this->connection->prepare($query);
 
             $uuid = Util::guidv4();
@@ -59,6 +75,8 @@ class UserRepository extends Database implements RepositoryInterface {
       
             $stmt->bindParam(":id", $uuid);
             $stmt->bindParam(":name", $data->name);
+            $stmt->bindParam(":active", $data->active);
+            $stmt->bindParam(":role", $data->role);
             $stmt->bindParam(":last_name", $data->last_name);
             $stmt->bindParam(":email", $data->email);
             $stmt->bindParam(":password", $plainPassword);
@@ -76,11 +94,22 @@ class UserRepository extends Database implements RepositoryInterface {
     }
     public function update($id, $data) {
         try {
+            $query = "UPDATE " . $this->db_table 
+            ." SET role = :role,
+               lastName = :lastName,
+               name = :name,
+               active = :active,
+               email = :email
+            WHERE id = :id";
 
-            $query = "UPDATE " . $this->gettingTableName() ." SET role = :role WHERE id = :id";
             $stmt = $this->connection->prepare($query);
+
             $stmt->bindParam(":id", $id);
             $stmt->bindParam(":role", $data->role);
+            $stmt->bindParam(":email", $data->email);
+            $stmt->bindParam(":active", $data->active);
+            $stmt->bindParam(":name", $data->name);
+            $stmt->bindParam(":lastName", $data->lastName);
             $stmt->execute();
 
             return $stmt->fetch(PDO::FETCH_OBJ);
@@ -90,7 +119,38 @@ class UserRepository extends Database implements RepositoryInterface {
             throw new Exception("Error in " . $pDOException->getMessage());
         }
     }
-    public function delete($id) {}
+    public function delete($id) {
+        try {
+            $query = "DELETE FROM " . $this->db_table . " WHERE id = :id";
+            $stmt = $this->connection->prepare($query);
+
+            $stmt->bindParam(":id", $id);
+            $stmt->execute();
+
+            return $stmt->fetch(PDO::FETCH_OBJ);
+        } catch (PDOException $pDOException) {
+            print "Error in " . $pDOException->getMessage();
+            $this->closeConnection();
+            throw new Exception("Error in " . $pDOException->getMessage());
+        }
+    }
+
+    public function deleteAuthors() {
+        try {
+            $query = "DELETE FROM " . $this->db_table . " WHERE role = :role";
+            $stmt = $this->connection->prepare($query);
+
+            $role_user = "AUTHOR";
+            $stmt->bindParam(":role", $role_user);
+            $stmt->execute();
+
+            return $stmt->fetch(PDO::FETCH_OBJ);
+        } catch (PDOException $pDOException) {
+            print "Error in " . $pDOException->getMessage();
+            $this->closeConnection();
+            throw new Exception("Error in " . $pDOException->getMessage());
+        }
+    }
 
     public function getByEmail($email) {
         try {
@@ -101,7 +161,7 @@ class UserRepository extends Database implements RepositoryInterface {
             email,
             role,
             password
-            FROM ". $this->gettingTableName() ."
+            FROM ". $this->db_table ."
             WHERE email = :email
             LIMIT 0,1";
     
