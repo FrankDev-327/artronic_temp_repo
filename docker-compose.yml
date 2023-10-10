@@ -1,0 +1,28 @@
+version: "3.1"
+
+services:
+  mysql:
+    image: mysql:latest
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "root"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  php:
+    image: php:8.1-fpm
+    restart: always
+    volumes:
+      - ./path/to/your/php/code:/var/www/html
+    depends_on:
+      - mysql
+    links:
+      - mysql
+
+volumes:
+  db_data:
