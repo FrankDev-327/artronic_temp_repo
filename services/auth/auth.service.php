@@ -1,5 +1,6 @@
 <?php
 
+include_once "../../dto/auth/login.dto.php";
 include "../../services/users/user.service.php";
 class AuthService {
     protected $userService;
@@ -8,8 +9,8 @@ class AuthService {
         $this->userService = new UserService();
     }
     
-    public function login($data) {
-        $existUser = $this->userService->getUserByEmail($data->email);
+    public function login(AuthDto $data) {
+        $existUser = $this->userService->getUserByEmail($data->getEmail());
         if(empty($existUser)) {
             return [
                 "check" => false,
@@ -18,7 +19,7 @@ class AuthService {
             ];
         }
 
-        $checkPassword = Util::verifyingPasswords($data->password, $existUser->password);
+        $checkPassword = Util::verifyingPasswords($data->getPassword(), $existUser->password);
 
         if($checkPassword == false) {
             return [

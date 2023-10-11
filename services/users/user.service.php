@@ -1,6 +1,7 @@
 <?php
 
 include "../../repository/user.repository.php";
+include_once "../../dto/users/create.dto.php";
 
 /**
  * Summary of UserService
@@ -18,7 +19,7 @@ class UserService {
         return $this->userRepository->findAll();
     }
 
-    public function createNewRegister($data) {
+    public function createNewRegister(CreateDto $data) {
         return $this->userRepository->save($data);
     }
 

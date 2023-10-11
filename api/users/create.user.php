@@ -6,10 +6,19 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 include "../../middleware/check.authorizare.token.php";
 include "../../middleware/check.role.user.php";
 include_once "../../services/users/user.service.php";
+include_once "../../dto/users/create.dto.php";
 
 $userService = new UserService();
 $data = json_decode(file_get_contents("php://input"));
-$userCreated = $userService->createNewRegister($data);
+$createDto = new CreateDto(
+    $data->name,
+    $data->password,
+    $data->last_name,
+    $data->email,
+    $data->role,
+    $data->active
+);
+$userCreated = $userService->createNewRegister($createDto);
 
 if ($userCreated) {
     http_response_code(200);

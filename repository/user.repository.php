@@ -1,19 +1,38 @@
 <?php
+
 session_start();
+include_once "../../dto/users/create.dto.php";
 include_once "../../config/database.php";
 include "../../interfaces/repository.interface.php";
 include "../../utils/util.php";
 
 class UserRepository extends Database implements RepositoryInterface {
 
+      /**
+       * Summary of connection
+       * @var 
+       */
       private $connection;
 
+      /**
+       * Summary of db_table
+       * @var string
+       */
       private $db_table = "users";
 
+      /**
+       * Summary of __construct
+       */
       public function __construct() {
         $this->connection = $this->gettingConnection();
       }
 
+    /**
+     * Summary of findById
+     * @param mixed $id
+     * @throws \Exception
+     * @return mixed
+     */
     public function findById($id) {
         try {
             $query = "SELECT 
@@ -38,6 +57,11 @@ class UserRepository extends Database implements RepositoryInterface {
         }
     }
 
+    /**
+     * Summary of findAll
+     * @throws \Exception
+     * @return array
+     */
     public function findAll() {
         try {
             $query = "SELECT 
@@ -58,7 +82,13 @@ class UserRepository extends Database implements RepositoryInterface {
             throw new Exception("Error in " . $pDOException->getMessage());
         }
     }
-    public function save($data) {
+    /**
+     * Summary of save
+     * @param CreateDto $data
+     * @throws \Exception
+     * @return bool
+     */
+    public function save(CreateDto $data) {
         try {
             $query = "INSERT INTO ". $this->db_table  
             ." SET id = :id, 
@@ -71,15 +101,21 @@ class UserRepository extends Database implements RepositoryInterface {
             $stmt = $this->connection->prepare($query);
 
             $uuid = Util::guidv4();
-            $plainPassword = Util::hashPassword($data->password);
-      
+    
+            $name = $data->getName();
+            $active = $data->getActive();
+            $role = $data->getRole();
+            $lastName = $data->getLastName();
+            $email = $data->getEmail();
+            $hashedPassword = Util::hashPassword($data->getPassword());
+
             $stmt->bindParam(":id", $uuid);
-            $stmt->bindParam(":name", $data->name);
-            $stmt->bindParam(":active", $data->active);
-            $stmt->bindParam(":role", $data->role);
-            $stmt->bindParam(":last_name", $data->last_name);
-            $stmt->bindParam(":email", $data->email);
-            $stmt->bindParam(":password", $plainPassword);
+            $stmt->bindParam(":name", $name);
+            $stmt->bindParam(":active", $active);
+            $stmt->bindParam(":role", $role);
+            $stmt->bindParam(":last_name", $lastName);
+            $stmt->bindParam(":email", $email);
+            $stmt->bindParam(":password", $hashedPassword);
 
             if($stmt->execute()){
                 return true;
@@ -129,7 +165,7 @@ class UserRepository extends Database implements RepositoryInterface {
         }
     }
 
-    public function updateStatus($id, $data) {
+    public function updateStatus(string $id, $data) {
         try {
             $query = "UPDATE " . $this->db_table 
             ." SET active = :active
@@ -148,7 +184,7 @@ class UserRepository extends Database implements RepositoryInterface {
         }
     }
 
-    public function delete($id) {
+    public function delete(string $id) {
         try {
             $query = "DELETE FROM " . $this->db_table . " WHERE id = :id";
             $stmt = $this->connection->prepare($query);
