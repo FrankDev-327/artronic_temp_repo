@@ -22,10 +22,14 @@ $userCreated = $userService->createNewRegister($createDto);
 
 if ($userCreated) {
     http_response_code(200);
-    echo 'User created successfully.';
+    echo json_encode([
+        "message" => "User created successfully."
+    ]);
 } else{
     http_response_code(401);
-    echo 'User could not be created.';
+    echo json_encode([
+        "message" => "User could not be created."
+    ]);
 }
 
 ?>

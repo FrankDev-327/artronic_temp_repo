@@ -1,6 +1,7 @@
 <?php
-include "../../env.info.php";
-include "./check.session.php";
+session_start();
+include_once "../../env.info.php";
+include_once "./check.session.php";
 
 if($_SESSION['user_role'] !== $constants['MAIN_ROLE'] && $_GET['id']) {
     http_response_code(400);

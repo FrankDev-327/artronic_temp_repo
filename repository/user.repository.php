@@ -6,6 +6,9 @@ include_once "../../config/database.php";
 include "../../interfaces/repository.interface.php";
 include "../../utils/util.php";
 
+/**
+ * Summary of UserRepository
+ */
 class UserRepository extends Database implements RepositoryInterface {
 
       /**
@@ -33,14 +36,14 @@ class UserRepository extends Database implements RepositoryInterface {
      * @throws \Exception
      * @return mixed
      */
-    public function findById($id) {
+    public function findById($id) : array {
         try {
             $query = "SELECT 
             id,
             name,
             lastName,
             email
-            FROM ". $this->db_table  ."
+            FROM ". $this->db_table ."
             WHERE id = ?
             LIMIT 0,1";
 
@@ -62,7 +65,7 @@ class UserRepository extends Database implements RepositoryInterface {
      * @throws \Exception
      * @return array
      */
-    public function findAll() {
+    public function findAll(): array {
         try {
             $query = "SELECT 
             DISTINCT id,
@@ -88,7 +91,7 @@ class UserRepository extends Database implements RepositoryInterface {
      * @throws \Exception
      * @return bool
      */
-    public function save(CreateDto $data) {
+    public function save($data): bool {
         try {
             $query = "INSERT INTO ". $this->db_table  
             ." SET id = :id, 
@@ -120,6 +123,7 @@ class UserRepository extends Database implements RepositoryInterface {
             if($stmt->execute()){
                 return true;
             }
+
             return false;
 
         } catch (PDOException $pDOException) {
@@ -129,7 +133,14 @@ class UserRepository extends Database implements RepositoryInterface {
         }
     }
 
-    public function update($id, $data) {
+    /**
+     * Summary of update
+     * @param mixed $id
+     * @param mixed $data
+     * @throws \Exception
+     * @return bool
+     */
+    public function update($id, $data): bool {
         try {
             $bindParams = array(
                 ":id" => $id,
@@ -165,15 +176,24 @@ class UserRepository extends Database implements RepositoryInterface {
         }
     }
 
-    public function updateStatus(string $id, $data) {
+    /**
+     * Summary of updateStatus
+     * @param string $id
+     * @param mixed $data
+     * @throws \Exception
+     * @return mixed
+     */
+    public function updateStatus($id, $data): bool {
         try {
             $query = "UPDATE " . $this->db_table 
             ." SET active = :active
             WHERE id = :id";
 
+            $status = $data->getActive();
+
             $stmt = $this->connection->prepare($query);
             $stmt->bindParam(":id", $id);
-            $stmt->bindParam(":active", $data->active);
+            $stmt->bindParam(":active", $status);
             $stmt->execute();
 
             return $stmt->fetch(PDO::FETCH_OBJ);
@@ -184,7 +204,13 @@ class UserRepository extends Database implements RepositoryInterface {
         }
     }
 
-    public function delete(string $id) {
+    /**
+     * Summary of delete
+     * @param mixed $id
+     * @throws \Exception
+     * @return mixed
+     */
+    public function delete($id): array {
         try {
             $query = "DELETE FROM " . $this->db_table . " WHERE id = :id";
             $stmt = $this->connection->prepare($query);
@@ -200,7 +226,12 @@ class UserRepository extends Database implements RepositoryInterface {
         }
     }
 
-    public function deleteAuthors() {
+    /**
+     * Summary of deleteAuthors
+     * @throws \Exception
+     * @return mixed
+     */
+    public function deleteAuthors() : array {
         try {
             $query = "DELETE FROM " . $this->db_table . " WHERE role = :role";
             $stmt = $this->connection->prepare($query);
@@ -217,6 +248,12 @@ class UserRepository extends Database implements RepositoryInterface {
         }
     }
 
+    /**
+     * Summary of getByEmail
+     * @param mixed $email
+     * @throws \Exception
+     * @return mixed
+     */
     public function getByEmail($email) {
         try {
             $query = "SELECT 

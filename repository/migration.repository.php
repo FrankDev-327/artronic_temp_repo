@@ -1,15 +1,34 @@
 <?php
 include_once "../../config/database.php";
 
+/**
+ * Summary of MigrationRepository
+ */
 class MigrationRepository extends Database {
+    /**
+     * Summary of connection
+     * @var 
+     */
     protected $connection;
 
+    /**
+     * Summary of db_table
+     * @var string
+     */
     private $db_table = "users";
 
+    /**
+     * Summary of __construct
+     */
     public function __construct() {
         $this->connection = $this->gettingConnection();
     }
 
+    /**
+     * Summary of addRoleColumnToUserTable
+     * @throws \Exception
+     * @return array
+     */
     public function addRoleColumnToUserTable() {
         try {
             $query = "ALTER TABLE ". $this->db_table . " ADD role VARCHAR(20)";
@@ -25,6 +44,11 @@ class MigrationRepository extends Database {
         }
     }
 
+    /**
+     * Summary of deleteRoleColumnToUserTable
+     * @throws \Exception
+     * @return array
+     */
     public function deleteRoleColumnToUserTable() {
         try {
             $query = "ALTER TABLE ". $this->db_table . " DROP role";
@@ -40,6 +64,11 @@ class MigrationRepository extends Database {
         }
     }
 
+    /**
+     * Summary of addActiveColumnIntoUserTable
+     * @throws \Exception
+     * @return array
+     */
     public function addActiveColumnIntoUserTable() {
         try {
             $query = "ALTER TABLE ". $this->db_table . " ADD active BOOLEAN";
@@ -55,6 +84,11 @@ class MigrationRepository extends Database {
         }
     }
 
+    /**
+     * Summary of deleteActiveColumnIntoUserTable
+     * @throws \Exception
+     * @return array
+     */
     public function deleteActiveColumnIntoUserTable() {
         try {
             $query = "ALTER TABLE ". $this->db_table . " DROP active";

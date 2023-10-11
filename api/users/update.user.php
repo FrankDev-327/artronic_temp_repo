@@ -30,7 +30,16 @@
         } 
     }
     
-    $userUpdated = $userService->updateExistingRegister($id, $data);
+    include "../../dto/users/update.dto.php";
+    $updateDto = new UpdateDto(
+        $data->name,
+        $data->$lastName,
+        $data->email,
+        $data->role,
+        $data->active
+    );
+
+    $userUpdated = $userService->updateExistingRegister($id, $updateDto);
     if (!$userUpdated) {
         http_response_code(401);
         echo json_encode([
