@@ -26,6 +26,10 @@ class UserService {
         return $this->userRepository->update($id, $data);
     }
 
+    public function updateUserStatus($id, $data) {
+        return $this->userRepository->updateStatus($id, $data);
+    }
+
     public function deleteRegister($id) {
         return $this->userRepository->delete($id);
     }

@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 include_once "../../config/database.php";
 include "../../interfaces/repository.interface.php";
 include "../../utils/util.php";
@@ -41,7 +41,7 @@ class UserRepository extends Database implements RepositoryInterface {
     public function findAll() {
         try {
             $query = "SELECT 
-            id,
+            DISTINCT id,
             email,
             lastName,
             name,
@@ -92,24 +92,52 @@ class UserRepository extends Database implements RepositoryInterface {
             throw new Exception("Error in " . $pDOException->getMessage());
         }
     }
+
     public function update($id, $data) {
         try {
+            $bindParams = array(
+                ":id" => $id,
+                ":name" => $data->name,
+                ":lastName" => $data->lastName,
+                ":email" => $data->email,
+                ":active" => $data->active,
+            );
+
+            $query = "UPDATE " . $this->db_table ." SET ";
+            if($_SESSION['user_role'] === "ADMIN") {
+                $query .= "role = :role, ";
+                $bindParams[':role'] = $data->role;
+            }
+
+            $query .= "lastName = :lastName, name = :name, email = :email, active = :active WHERE id = :id";
+            $stmt = $this->connection->prepare($query);
+            
+            foreach($bindParams as $paramName => $paramValue) {
+                $stmt->bindParam($paramName, $paramValue);
+            }
+            
+            if($stmt->execute()) {
+                return true;
+            }
+
+            return false;
+              
+        } catch (PDOException $pDOException) {
+            print "Error in " . $pDOException->getMessage();
+            $this->closeConnection();
+            throw new Exception("Error in " . $pDOException->getMessage());
+        }
+    }
+
+    public function updateStatus($id, $data) {
+        try {
             $query = "UPDATE " . $this->db_table 
-            ." SET role = :role,
-               lastName = :lastName,
-               name = :name,
-               active = :active,
-               email = :email
+            ." SET active = :active
             WHERE id = :id";
 
             $stmt = $this->connection->prepare($query);
-
             $stmt->bindParam(":id", $id);
-            $stmt->bindParam(":role", $data->role);
-            $stmt->bindParam(":email", $data->email);
             $stmt->bindParam(":active", $data->active);
-            $stmt->bindParam(":name", $data->name);
-            $stmt->bindParam(":lastName", $data->lastName);
             $stmt->execute();
 
             return $stmt->fetch(PDO::FETCH_OBJ);
@@ -119,6 +147,7 @@ class UserRepository extends Database implements RepositoryInterface {
             throw new Exception("Error in " . $pDOException->getMessage());
         }
     }
+
     public function delete($id) {
         try {
             $query = "DELETE FROM " . $this->db_table . " WHERE id = :id";
