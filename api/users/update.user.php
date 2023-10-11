@@ -31,15 +31,16 @@
     }
     
     $userUpdated = $userService->updateExistingRegister($id, $data);
-    if ($userUpdated) {
-        http_response_code(200);
-        echo json_encode([
-            'message' => 'User updated successfully.'
-        ]);
-    } else{
+    if (!$userUpdated) {
         http_response_code(401);
         echo json_encode([
             'message' => 'User was not updated successfully.'
         ]);
-    }
+        die();
+    } 
+
+    http_response_code(200);
+    echo json_encode([
+        'message' => 'User updated successfully.'
+    ]);
 ?>

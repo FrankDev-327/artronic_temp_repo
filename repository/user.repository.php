@@ -92,6 +92,7 @@ class UserRepository extends Database implements RepositoryInterface {
             throw new Exception("Error in " . $pDOException->getMessage());
         }
     }
+
     public function update($id, $data) {
         try {
             $bindParams = array(
@@ -110,7 +111,7 @@ class UserRepository extends Database implements RepositoryInterface {
 
             $query .= "lastName = :lastName, name = :name, email = :email, active = :active WHERE id = :id";
             $stmt = $this->connection->prepare($query);
-            echo json_encode($stmt);
+            
             foreach($bindParams as $paramName => $paramValue) {
                 $stmt->bindParam($paramName, $paramValue);
             }
