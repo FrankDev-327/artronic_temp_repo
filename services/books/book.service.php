@@ -19,7 +19,7 @@ class BookService {
         return $this->bookRepository->findAll();
     }
 
-    public function createNewRegister(CreateDto $data): bool {
+    public function createNewRegister(CreateBookDto $data): bool {
         return $this->bookRepository->save($data);
     }
 }

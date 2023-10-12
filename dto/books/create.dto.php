@@ -1,6 +1,6 @@
 <?php 
 
-class CreateDto {
+class CreateBookDto {
     /**
      * Summary of userId
      * @var string

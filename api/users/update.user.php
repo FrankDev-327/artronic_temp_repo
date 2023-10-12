@@ -36,7 +36,8 @@
         $data->$lastName,
         $data->email,
         $data->role,
-        $data->active
+        $data->active,
+        $data->bookId
     );
 
     $userUpdated = $userService->updateExistingRegister($id, $updateDto);

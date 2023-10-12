@@ -144,10 +144,11 @@ class UserRepository extends Database implements RepositoryInterface {
         try {
             $bindParams = array(
                 ":id" => $id,
-                ":name" => $data->name,
-                ":lastName" => $data->lastName,
-                ":email" => $data->email,
-                ":active" => $data->active,
+                ":name" => $data->getName(),
+                ":lastName" => $data->getLastName(),
+                ":email" => $data->getEmail(),
+                ":active" => $data->getActive(),
+                ":book_id" => $data->getBookId()
             );
 
             $query = "UPDATE " . $this->db_table ." SET ";
@@ -156,7 +157,13 @@ class UserRepository extends Database implements RepositoryInterface {
                 $bindParams[':role'] = $data->role;
             }
 
-            $query .= "lastName = :lastName, name = :name, email = :email, active = :active WHERE id = :id";
+            $query .= "lastName = :lastName, 
+            name = :name, 
+            email = :email, 
+            active = :active, 
+            book_id = :book_id 
+            WHERE id = :id";
+            
             $stmt = $this->connection->prepare($query);
             
             foreach($bindParams as $paramName => $paramValue) {

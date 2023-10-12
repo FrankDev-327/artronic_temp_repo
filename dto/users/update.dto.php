@@ -21,12 +21,18 @@ class UpdateDto {
      * Summary of role
      * @var string
      */
-    private string $role;
+    private ?string $role;
     /**
      * Summary of active
      * @var bool
      */
     private bool $active;
+
+    /**
+     * Summary of bookId
+     * @var string
+     */
+    private ?string $bookId; // The ? indicates that it can be null
 
     public function __construct
         (
@@ -34,13 +40,15 @@ class UpdateDto {
             string $lastName, 
             string $email, 
             string $role, 
-            bool $active
+            bool $active,
+            string $bookId
         ) {
         $this->name = $name;
         $this->lastName = $lastName;
         $this->email = $email;
         $this->role = $role;
         $this->active = $active;
+        $this->bookId = $bookId;
     }
 
 	/**
@@ -79,6 +87,14 @@ class UpdateDto {
 	 */
 	public function getActive(): bool {
 		return $this->active;
+	}
+
+	/**
+	 * Summary of bookId
+	 * @return string
+	 */
+	public function getBookId(): string {
+		return $this->bookId;
 	}
 }
 
