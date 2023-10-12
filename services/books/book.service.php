@@ -1,7 +1,7 @@
 <?php 
 
-include "../../repository/book.repository.php";
-include "../../dto/books/create.dto.php";
+include_once "../../repository/book.repository.php";
+include_once "../../dto/books/create.dto.php";
 
 class BookService {
 

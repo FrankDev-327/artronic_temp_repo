@@ -3,8 +3,8 @@
 session_start();
 include_once "../../dto/users/create.dto.php";
 include_once "../../config/database.php";
-include "../../interfaces/repository.interface.php";
-include "../../utils/util.php";
+include_once "../../interfaces/repository.interface.php";
+include_once "../../utils/util.php";
 
 /**
  * Summary of UserRepository
@@ -36,19 +36,21 @@ class UserRepository extends Database implements RepositoryInterface {
      * @throws \Exception
      * @return mixed
      */
-    public function findById($id) : array {
+    public function findById($id)  {
         try {
             $query = "SELECT 
             id,
             name,
             lastName,
-            email
-            FROM ". $this->db_table ."
-            WHERE id = ?
+            email,
+            role,
+            active
+            FROM ". $this->db_table ." 
+            WHERE id = :id
             LIMIT 0,1";
 
             $stmt = $this->connection->prepare($query);
-            $stmt->bindParam(1, $id);
+            $stmt->bindParam(":id", $id);
 
             $stmt->execute();
 
@@ -65,7 +67,7 @@ class UserRepository extends Database implements RepositoryInterface {
      * @throws \Exception
      * @return array
      */
-    public function findAll(): array {
+    public function findAll() {
         try {
             $query = "SELECT 
             DISTINCT id,
@@ -91,7 +93,7 @@ class UserRepository extends Database implements RepositoryInterface {
      * @throws \Exception
      * @return bool
      */
-    public function save($data): bool {
+    public  function save($data) {
         try {
             $query = "INSERT INTO ". $this->db_table  
             ." SET id = :id, 
@@ -140,8 +142,9 @@ class UserRepository extends Database implements RepositoryInterface {
      * @throws \Exception
      * @return bool
      */
-    public function update($id, $data): bool {
+    public function update($id, $data) {
         try {
+            $queryExecute = false;
             $bindParams = array(
                 ":id" => $id,
                 ":name" => $data->getName(),
@@ -154,7 +157,7 @@ class UserRepository extends Database implements RepositoryInterface {
             $query = "UPDATE " . $this->db_table ." SET ";
             if($_SESSION['user_role'] === "ADMIN") {
                 $query .= "role = :role, ";
-                $bindParams[':role'] = $data->role;
+                $bindParams[':role'] = $data->getRole();
             }
 
             $query .= "lastName = :lastName, 
@@ -164,17 +167,16 @@ class UserRepository extends Database implements RepositoryInterface {
             book_id = :book_id 
             WHERE id = :id";
             
-            $stmt = $this->connection->prepare($query);
-            
+            $stmt = $this->connection->prepare($query);        
             foreach($bindParams as $paramName => $paramValue) {
                 $stmt->bindParam($paramName, $paramValue);
             }
             
             if($stmt->execute()) {
-                return true;
+                $queryExecute = true;
             }
 
-            return false;
+            return $queryExecute;
               
         } catch (PDOException $pDOException) {
             print "Error in " . $pDOException->getMessage();
@@ -190,7 +192,7 @@ class UserRepository extends Database implements RepositoryInterface {
      * @throws \Exception
      * @return mixed
      */
-    public function updateStatus($id, $data): bool {
+    public function updateStatus($id, $data) {
         try {
             $query = "UPDATE " . $this->db_table 
             ." SET active = :active
@@ -217,7 +219,7 @@ class UserRepository extends Database implements RepositoryInterface {
      * @throws \Exception
      * @return mixed
      */
-    public function delete($id): array {
+    public function delete($id) {
         try {
             $query = "DELETE FROM " . $this->db_table . " WHERE id = :id";
             $stmt = $this->connection->prepare($query);
@@ -238,7 +240,7 @@ class UserRepository extends Database implements RepositoryInterface {
      * @throws \Exception
      * @return mixed
      */
-    public function deleteAuthors() : array {
+    public function deleteAuthors() {
         try {
             $query = "DELETE FROM " . $this->db_table . " WHERE role = :role";
             $stmt = $this->connection->prepare($query);

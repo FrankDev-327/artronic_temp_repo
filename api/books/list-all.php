@@ -11,7 +11,7 @@
     $bookService = new BookService();
     $books = $bookService->getListRegisters();
 
-    if(isset($books)) {
+    if(count($books) <= 0) {
         http_response_code(404);
         echo json_encode([
             "message" => "No record found."

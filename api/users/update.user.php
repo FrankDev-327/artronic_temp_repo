@@ -30,7 +30,7 @@
         } 
     }
     
-    include "../../dto/users/update.dto.php";
+    include_once "../../dto/users/update.dto.php";
     $updateDto = new UpdateDto(
         $data->name,
         $data->$lastName,

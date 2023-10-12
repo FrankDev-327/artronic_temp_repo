@@ -1,9 +1,10 @@
 <?php 
     session_start();
     include_once "../../config/database.php";
-    include "../../interfaces/repository.interface.php";
+    include_once "../../interfaces/repository.interface.php";
     include "../../services/users/user.service.php";
-    include "../../dto/users/update.dto.php";
+    include_once "../../dto/users/update.dto.php";
+    include_once "../../utils/util.php";
 
     /**
      * Summary of BookRepository
@@ -24,28 +25,30 @@
             $this->connection = $this->gettingConnection();
         }
 
-        public function save($data): bool {
+        public function save($data) {
             try {
                 $queryExecute = false;
                 $query = "INSERT INTO " . $this->db_table 
-                . "SET 
+                . " SET id = :id,
                 title = :title,
                 description = :description,
-                publisher = :publisher 
-                ";
+                publisher = :publisher";
+                $stmt = $this->connection->prepare($query);
 
                 $title = $data->getTitle();
                 $description = $data->getDescription();
                 $publisher = $data->getPublisher();
 
-                $stmt = $this->connection->prepare($query);
+                $uuid = Util::guidv4();
+
+                $stmt->bindParam(":id", $uuid);
                 $stmt->bindParam(":title", $title);
                 $stmt->bindParam(":description", $description);
                 $stmt->bindParam(":publisher", $publisher);
 
-                if($stmt->execute()){
-                    $userId = !isset($data->userId) 
-                    ?  $data->userId 
+                if($stmt->execute()) {
+                    $userId = !empty($data->getUserId()) 
+                    ?  $data->getUserId() 
                     : $_SESSION['user_id'];
 
                     $user = $this->userService->getDetailsRegister($userId);
@@ -83,7 +86,7 @@
          * Summary of findAll
          * @return array
          */
-        public function findAll(): array {
+        public function findAll() {
             try {
                 $query = "SELECT * FROM " . $this->db_table;
                 $stmt = $this->connection->prepare($query);
@@ -97,7 +100,7 @@
             }
         }
 
-        public function findById($id): array {
+        public function findById($id) {
             try {
                 $queryExecute = false;
                 $query = "SELECT * FROM " 
@@ -118,7 +121,7 @@
             }
         }
 
-        public function update($id, $data): bool {
+        public function update($id, $data) {
             try {
                 return true;
             } catch (PDOException $pDOException) {
@@ -128,7 +131,7 @@
             }
         }
 
-        public function delete($id): array {
+        public function delete($id) {
             try {
                 $query = "DELETE FROM " . $this->db_table . " WHERE id = :id";
                 $stmt = $this->connection->prepare($query);
@@ -146,7 +149,7 @@
 
         public function getIdByTitle(string $title) {
             try {
-                $query = "SELECT id FROM " . $this->db_table . "WHERE title = :title";
+                $query = "SELECT id FROM " . $this->db_table . " WHERE title = :title";
                 $stmt = $this->connection->prepare($query);
 
                 $stmt->bindParam(":title", $title);

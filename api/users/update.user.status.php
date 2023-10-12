@@ -3,7 +3,7 @@
     header("Access-Control-Allow-Methods: PUT");
     header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-    include_once "../../services/users/user.service.php";
+    include "../../services/users/user.service.php";
     include_once "../../dto/users/update.status.dto.php";
 
     $userService = new UserService();
