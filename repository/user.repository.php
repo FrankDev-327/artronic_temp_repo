@@ -1,32 +1,56 @@
 <?php
-session_start();
-include_once "../../config/database.php";
-include "../../interfaces/repository.interface.php";
-include "../../utils/util.php";
 
+session_start();
+include_once "../../dto/users/create.dto.php";
+include_once "../../config/database.php";
+include_once "../../interfaces/repository.interface.php";
+include_once "../../utils/util.php";
+
+/**
+ * Summary of UserRepository
+ */
 class UserRepository extends Database implements RepositoryInterface {
 
+      /**
+       * Summary of connection
+       * @var 
+       */
       private $connection;
 
+      /**
+       * Summary of db_table
+       * @var string
+       */
       private $db_table = "users";
 
+      /**
+       * Summary of __construct
+       */
       public function __construct() {
         $this->connection = $this->gettingConnection();
       }
 
-    public function findById($id) {
+    /**
+     * Summary of findById
+     * @param mixed $id
+     * @throws \Exception
+     * @return mixed
+     */
+    public function findById($id)  {
         try {
             $query = "SELECT 
             id,
             name,
             lastName,
-            email
-            FROM ". $this->db_table  ."
-            WHERE id = ?
+            email,
+            role,
+            active
+            FROM ". $this->db_table ." 
+            WHERE id = :id
             LIMIT 0,1";
 
             $stmt = $this->connection->prepare($query);
-            $stmt->bindParam(1, $id);
+            $stmt->bindParam(":id", $id);
 
             $stmt->execute();
 
@@ -38,6 +62,11 @@ class UserRepository extends Database implements RepositoryInterface {
         }
     }
 
+    /**
+     * Summary of findAll
+     * @throws \Exception
+     * @return array
+     */
     public function findAll() {
         try {
             $query = "SELECT 
@@ -58,7 +87,13 @@ class UserRepository extends Database implements RepositoryInterface {
             throw new Exception("Error in " . $pDOException->getMessage());
         }
     }
-    public function save($data) {
+    /**
+     * Summary of save
+     * @param CreateDto $data
+     * @throws \Exception
+     * @return bool
+     */
+    public  function save($data) {
         try {
             $query = "INSERT INTO ". $this->db_table  
             ." SET id = :id, 
@@ -71,19 +106,26 @@ class UserRepository extends Database implements RepositoryInterface {
             $stmt = $this->connection->prepare($query);
 
             $uuid = Util::guidv4();
-            $plainPassword = Util::hashPassword($data->password);
-      
+    
+            $name = $data->getName();
+            $active = $data->getActive();
+            $role = $data->getRole();
+            $lastName = $data->getLastName();
+            $email = $data->getEmail();
+            $hashedPassword = Util::hashPassword($data->getPassword());
+
             $stmt->bindParam(":id", $uuid);
-            $stmt->bindParam(":name", $data->name);
-            $stmt->bindParam(":active", $data->active);
-            $stmt->bindParam(":role", $data->role);
-            $stmt->bindParam(":last_name", $data->last_name);
-            $stmt->bindParam(":email", $data->email);
-            $stmt->bindParam(":password", $plainPassword);
+            $stmt->bindParam(":name", $name);
+            $stmt->bindParam(":active", $active);
+            $stmt->bindParam(":role", $role);
+            $stmt->bindParam(":last_name", $lastName);
+            $stmt->bindParam(":email", $email);
+            $stmt->bindParam(":password", $hashedPassword);
 
             if($stmt->execute()){
                 return true;
             }
+
             return false;
 
         } catch (PDOException $pDOException) {
@@ -93,34 +135,48 @@ class UserRepository extends Database implements RepositoryInterface {
         }
     }
 
+    /**
+     * Summary of update
+     * @param mixed $id
+     * @param mixed $data
+     * @throws \Exception
+     * @return bool
+     */
     public function update($id, $data) {
         try {
+            $queryExecute = false;
             $bindParams = array(
                 ":id" => $id,
-                ":name" => $data->name,
-                ":lastName" => $data->lastName,
-                ":email" => $data->email,
-                ":active" => $data->active,
+                ":name" => $data->getName(),
+                ":lastName" => $data->getLastName(),
+                ":email" => $data->getEmail(),
+                ":active" => $data->getActive(),
+                ":book_id" => $data->getBookId()
             );
 
             $query = "UPDATE " . $this->db_table ." SET ";
             if($_SESSION['user_role'] === "ADMIN") {
                 $query .= "role = :role, ";
-                $bindParams[':role'] = $data->role;
+                $bindParams[':role'] = $data->getRole();
             }
 
-            $query .= "lastName = :lastName, name = :name, email = :email, active = :active WHERE id = :id";
-            $stmt = $this->connection->prepare($query);
+            $query .= "lastName = :lastName, 
+            name = :name, 
+            email = :email, 
+            active = :active, 
+            book_id = :book_id 
+            WHERE id = :id";
             
+            $stmt = $this->connection->prepare($query);        
             foreach($bindParams as $paramName => $paramValue) {
                 $stmt->bindParam($paramName, $paramValue);
             }
             
             if($stmt->execute()) {
-                return true;
+                $queryExecute = true;
             }
 
-            return false;
+            return $queryExecute;
               
         } catch (PDOException $pDOException) {
             print "Error in " . $pDOException->getMessage();
@@ -129,15 +185,24 @@ class UserRepository extends Database implements RepositoryInterface {
         }
     }
 
+    /**
+     * Summary of updateStatus
+     * @param string $id
+     * @param mixed $data
+     * @throws \Exception
+     * @return mixed
+     */
     public function updateStatus($id, $data) {
         try {
             $query = "UPDATE " . $this->db_table 
             ." SET active = :active
             WHERE id = :id";
 
+            $status = $data->getActive();
+
             $stmt = $this->connection->prepare($query);
             $stmt->bindParam(":id", $id);
-            $stmt->bindParam(":active", $data->active);
+            $stmt->bindParam(":active", $status);
             $stmt->execute();
 
             return $stmt->fetch(PDO::FETCH_OBJ);
@@ -148,6 +213,12 @@ class UserRepository extends Database implements RepositoryInterface {
         }
     }
 
+    /**
+     * Summary of delete
+     * @param mixed $id
+     * @throws \Exception
+     * @return mixed
+     */
     public function delete($id) {
         try {
             $query = "DELETE FROM " . $this->db_table . " WHERE id = :id";
@@ -164,6 +235,11 @@ class UserRepository extends Database implements RepositoryInterface {
         }
     }
 
+    /**
+     * Summary of deleteAuthors
+     * @throws \Exception
+     * @return mixed
+     */
     public function deleteAuthors() {
         try {
             $query = "DELETE FROM " . $this->db_table . " WHERE role = :role";
@@ -181,6 +257,12 @@ class UserRepository extends Database implements RepositoryInterface {
         }
     }
 
+    /**
+     * Summary of getByEmail
+     * @param mixed $email
+     * @throws \Exception
+     * @return mixed
+     */
     public function getByEmail($email) {
         try {
             $query = "SELECT 

@@ -1,5 +1,7 @@
 <?php
 
+include_once "../../dto/users/create.dto.php";
+
 interface RepositoryInterface {
     public function findById($id);
     public function findAll();
